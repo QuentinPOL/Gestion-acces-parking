@@ -11,7 +11,7 @@ ClientTCPIP::ClientTCPIP(QObject* parent) : QObject(parent)
 	QObject::connect(socketClient, SIGNAL(readyRead()), this, SLOT(onSocketReadyRead())); // On connecte nos signaux et slots avec le signal readyRead
 
 	// On va essayer de se connecter au serveur
-	socketClient->connectToHost("127.0.0.1", 1234);
+	socketClient->connectToHost("192.168.64.91", 1234);
 }
 
 // Destructeur

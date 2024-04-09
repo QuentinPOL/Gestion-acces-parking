@@ -145,16 +145,6 @@ void LicensePlate::drawLicensePlate(cv::Mat& frame, std::vector<std::vector<cv::
 		}
 
 		if (resultPlateNumber != "")
-<<<<<<< HEAD:Reconnaissance_PlaqueImmac/Reconnaissance_PlaqueImmac/LicensePlate.cpp
-			std::cout << "Plaque d'immatriculation : " << resultPlateNumber << std::endl; // Afficher la nouvelle chaîne composée uniquement de caractères valides
-		else
-			std::cout << "Plaque non reconnu : Ce format n'est pas reconnu !" << std::endl;
-	}
-
-	cv::Mat drawing = cv::Mat::zeros(frame.size(), CV_8UC3);
-	std::vector<cv::Vec4i> hierarchy;
-	for (int i = 0; i < candidates.size(); i++)
-=======
 		{
 			qDebug() << "Plaque d'immatriculation : " << resultPlateNumber; // Afficher la nouvelle chaîne composée uniquement de caractères valides
 			this->licensePlate = resultPlateNumber; // Ducoup on met la plaque dedans
@@ -168,14 +158,10 @@ void LicensePlate::drawLicensePlate(cv::Mat& frame, std::vector<std::vector<cv::
 	std::vector<cv::Vec4i> hierarchy;
 
 	for (int i = 0; i < candidates.size(); i++) 
->>>>>>> f70e7cba72ffc5eb148b1c58ef92bf91552dbbd7:Reconnaissance_plaqueTCPQT/Reconnaissance_plaqueTCPQT/LicensePlate.cpp
 	{
 		cv::Scalar color = cv::Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
 		cv::drawContours(drawing, candidates, i, color, 2, 8, hierarchy, 0, cv::Point());
 	}
-<<<<<<< HEAD:Reconnaissance_PlaqueImmac/Reconnaissance_PlaqueImmac/LicensePlate.cpp
-	cv::imshow("Drawing", drawing);
-=======
 
 	cv::imshow("Drawing", drawing);
 }
@@ -183,5 +169,4 @@ void LicensePlate::drawLicensePlate(cv::Mat& frame, std::vector<std::vector<cv::
 QString LicensePlate::getLicensePlate()
 {
 	return this->licensePlate;
->>>>>>> f70e7cba72ffc5eb148b1c58ef92bf91552dbbd7:Reconnaissance_plaqueTCPQT/Reconnaissance_plaqueTCPQT/LicensePlate.cpp
 }

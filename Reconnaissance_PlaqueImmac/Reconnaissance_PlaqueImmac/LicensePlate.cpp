@@ -143,27 +143,17 @@ void LicensePlate::drawLicensePlate(cv::Mat& frame, std::vector<std::vector<cv::
 		}
 
 		if (resultPlateNumber != "")
-		{
 			std::cout << "Plaque d'immatriculation : " << resultPlateNumber << std::endl; // Afficher la nouvelle chaîne composée uniquement de caractères valides
-		
-			//char a = 'n', b = 'i', c = 'g', d = 'g', e = 'a', f = 's';
-			//printf("%c%c%c%c%c%c", a, b, c, d, e, f);
-		}
 		else
-		{
-			std::cout << "Plaque non reconnu : Encore un etranger ???" << std::endl;
-		}
+			std::cout << "Plaque non reconnu : Ce format n'est pas reconnu !" << std::endl;
 	}
 
-	//// Debug code for drawing contours
-	//cv::Mat drawing = cv::Mat::zeros(frame.size(), CV_8UC3);
-	//std::vector<cv::Vec4i> hierarchy;
-
-	//for (int i = 0; i < candidates.size(); i++) 
-	//{
-	//	cv::Scalar color = cv::Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
-	//	cv::drawContours(drawing, candidates, i, color, 2, 8, hierarchy, 0, cv::Point());
-	//}
-
-	//cv::imshow("Drawing", drawing);
+	cv::Mat drawing = cv::Mat::zeros(frame.size(), CV_8UC3);
+	std::vector<cv::Vec4i> hierarchy;
+	for (int i = 0; i < candidates.size(); i++)
+	{
+		cv::Scalar color = cv::Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
+		cv::drawContours(drawing, candidates, i, color, 2, 8, hierarchy, 0, cv::Point());
+	}
+	cv::imshow("Drawing", drawing);
 }

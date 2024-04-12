@@ -6,6 +6,9 @@ cv::RNG rng(12345);
 // Localize the possible Licenses Plates
 std::vector<std::vector<cv::Point>> LicensePlate::locateCandidates(cv::Mat& frame)
 {
+	qDebug() << "/////////////////////////////////////";
+	qDebug() << "Methode LicensePlate::locateCandidates(cv::Mat& frame) : CALL";
+
 	// Reduce the image dimension to process (for speed up)
 	cv::Mat processedFrame = frame;
 	cv::resize(frame, processedFrame, cv::Size(512, 512));
@@ -73,12 +76,18 @@ std::vector<std::vector<cv::Point>> LicensePlate::locateCandidates(cv::Mat& fram
 		top_contours.assign(start, contours.end());
 	}
 
+	qDebug() << "Methode LicensePlate::locateCandidates(cv::Mat& frame) : PASS";
+	qDebug() << "/////////////////////////////////////\n";
+
 	return top_contours;
 }
 
 // Draw the possible Licenses Plates
 void LicensePlate::drawLicensePlate(cv::Mat& frame, std::vector<std::vector<cv::Point>>& candidates)
 {
+	qDebug() << "/////////////////////////////////////";
+	qDebug() << "Methode LicensePlate::drawLicensePlate(cv::Mat& frame, std::vector<std::vector<cv::Point>>& candidates) : CALL";
+
 	const int width = frame.cols;
 	const int height = frame.rows;
 	const float ratio_width = width / (float)512;    // WARNING! Aspect ratio may affect the performance (TO DO LIST)
@@ -171,12 +180,21 @@ void LicensePlate::drawLicensePlate(cv::Mat& frame, std::vector<std::vector<cv::
 	}
 
 	cv::imshow("Drawing", drawing);
+
+	qDebug() << "Methode LicensePlate::drawLicensePlate(cv::Mat& frame, std::vector<std::vector<cv::Point>>& candidates) : PASS";
+	qDebug() << "/////////////////////////////////////\n";
 }
 
 QString LicensePlate::getLicensePlate()
 {
+	qDebug() << "/////////////////////////////////////";
+	qDebug() << "Methode QString LicensePlate::getLicensePlate() : CALL";
+
 	QString temp = this->licensePlate;
 	this->licensePlate = "";
+
+	qDebug() << "Methode QString LicensePlate::getLicensePlate() : PASS";
+	qDebug() << "/////////////////////////////////////";
 
 	return temp;
 }

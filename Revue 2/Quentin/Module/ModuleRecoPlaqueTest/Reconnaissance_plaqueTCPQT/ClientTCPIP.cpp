@@ -3,12 +3,16 @@
 // Constructeur
 ClientTCPIP::ClientTCPIP(QObject* parent) : QObject(parent)
 {
-	lp = new LicensePlate(); // Instantiate LicensePlate object
+	qDebug() << "/////////////////////////////////////";
+	qDebug() << "Constructeur ClientTCPIP::ClientTCPIP(QObject* parent) : CALL";
+
+	if (lp = new LicensePlate()) // Instantiate LicensePlate object
+		qDebug() << "Constructeur LicensePlate : PASS";
 
 	// On va lancer le processus d'analyse de plaque [NE PAS OUBLIER DE FAIRE UNE CLASSE CAMERA]
 		/*
 		 __     __    __     ______     ______     ______
-		/\ \   /\ "-./  \   /\  __ \   /\  ___\   /\  ___\
+		\ \   /\ "-./  \   /\  __ \   /\  ___\   /\  ___\
 		\ \ \  \ \ \-./\ \  \ \  __ \  \ \ \__ \  \ \  __\
 		 \ \_\  \ \_\ \ \_\  \ \_\ \_\  \ \_____\  \ \_____\
 		  \/_/   \/_/  \/_/   \/_/\/_/   \/_____/   \/_____/
@@ -19,18 +23,22 @@ ClientTCPIP::ClientTCPIP(QObject* parent) : QObject(parent)
 	image = cv::imread(filename, cv::IMREAD_COLOR);
 
 	if (!image.data)
-		qDebug() << "ERREUR: IMPOSSIBLE DE LIRE L'IMAGE DEPUIS LE FICHIER\n\n";
+		qDebug() << "ERREUR: IMPOSSIBLE DE LIRE L'IMAGE DEPUIS LE FICHIER";
 	else
-		qDebug() << "IMAGE CHARGER AVEC SUCCES\n\n";
+		qDebug() << "IMAGE CHARGER AVEC SUCCES";
 
 	std::vector<std::vector<cv::Point>> candidates = lp->locateCandidates(image);
+
+	if (candidates.size() != 0)
+		qDebug() << "Une plaque ou plusieurs ont etaient trouves";
+
 	lp->drawLicensePlate(image, candidates);
 
 	// Et ensuite la retouner afin de la renvoyer au superviseur/piloteur
 	// Créer un nouvel objet JSON avec la structure souhaitée
-	//QString Plaque = lp->getLicensePlate();
+	QString Plaque = lp->getLicensePlate();
+	qDebug() << "La plaque d'immatriculaton est : " << Plaque;
 	imshow("Plates Detection", image);
-
 
 	/*
 	  __   __   __     _____     ______     ______
@@ -81,10 +89,19 @@ ClientTCPIP::ClientTCPIP(QObject* parent) : QObject(parent)
 	cap.release();
 	cv::destroyAllWindows();
 	*/
+
+	qDebug() << "Constructeur ClientTCPIP::ClientTCPIP(QObject* parent) : PASS";
+	qDebug() << "/////////////////////////////////////\n";
 }
 
 // Destructeur
 ClientTCPIP::~ClientTCPIP()
 {
+	qDebug() << "/////////////////////////////////////";
+	qDebug() << "Desctructeur ClientTCPIP::~ClientTCPIP() : CALL";
+
 	delete lp;
+
+	qDebug() << "Desctructeur ClientTCPIP::~ClientTCPIP() : PASS";
+	qDebug() << "/////////////////////////////////////\n";
 }

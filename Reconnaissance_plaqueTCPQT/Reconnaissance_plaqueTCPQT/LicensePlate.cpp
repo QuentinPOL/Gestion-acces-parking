@@ -150,7 +150,7 @@ void LicensePlate::drawLicensePlate(cv::Mat& frame, std::vector<std::vector<cv::
 			this->licensePlate = resultPlateNumber; // Ducoup on met la plaque dedans
 		}
 		else
-			qDebug() << "Plaque non reconnue : Format non reconnu !";
+			qDebug() << "Status : Aucune plaque valable reconnue";
 	}
 
 	//// Debug code for drawing contours
@@ -168,5 +168,8 @@ void LicensePlate::drawLicensePlate(cv::Mat& frame, std::vector<std::vector<cv::
 
 QString LicensePlate::getLicensePlate()
 {
-	return this->licensePlate;
+	QString temp = this->licensePlate;
+	this->licensePlate = "";
+
+	return temp;
 }

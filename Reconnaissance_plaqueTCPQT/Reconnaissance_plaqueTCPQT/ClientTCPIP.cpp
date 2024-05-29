@@ -11,7 +11,7 @@ ClientTCPIP::ClientTCPIP(QObject* parent) : QObject(parent)
 	QObject::connect(socketClient, SIGNAL(readyRead()), this, SLOT(onSocketReadyRead())); // On connecte nos signaux et slots avec le signal readyRead
 
 	// On va essayer de se connecter au serveur
-	socketClient->connectToHost("192.168.64.91", 1234);
+	socketClient->connectToHost("192.168.65.210", 1234);
 }
 
 // Destructeur
@@ -56,29 +56,6 @@ void ClientTCPIP::onSocketReadyRead()
 	QJsonObject jsonMessage = QJsonDocument::fromJson(str.toUtf8()).object(); // On décode en objet JSON    
 	if (jsonMessage.contains("DemandeRecoPlaque") && jsonMessage["DemandeRecoPlaque"].toString() == "DemandeOUI") // si on recoit une demande de reconnaissance de plaque
 	{
-		// On va lancer le processus d'analyse de plaque [NE PAS OUBLIER DE FAIRE UNE CLASSE CAMERA]
-		/*
-		 __     __    __     ______     ______     ______
-		/\ \   /\ "-./  \   /\  __ \   /\  ___\   /\  ___\
-		\ \ \  \ \ \-./\ \  \ \  __ \  \ \ \__ \  \ \  __\
-		 \ \_\  \ \_\ \ \_\  \ \_\ \_\  \ \_____\  \ \_____\
-		  \/_/   \/_/  \/_/   \/_/\/_/   \/_____/   \/_____/
-		*/
-
-		std::string filename = "Resources/plaques-WW.jpg"; // A remplacer les frames de la caméra
-		cv::Mat image;
-		image = cv::imread(filename, cv::IMREAD_COLOR);
-
-		if (!image.data)
-			qDebug() << "ERREUR: IMPOSSIBLE DE LIRE L'IMAGE DEPUIS LE FICHIER\n\n";
-		else
-			qDebug() << "IMAGE CHARGER AVEC SUCCES\n\n";
-
-		std::vector<std::vector<cv::Point>> candidates = lp->locateCandidates(image);
-		lp->drawLicensePlate(image, candidates);
-
-		imshow("Plates Detection", image);
-
 		/*
 		  __   __   __     _____     ______     ______
 		 /\ \ / /  /\ \   /\  __-.  /\  ___\   /\  __ \
@@ -87,55 +64,67 @@ void ClientTCPIP::onSocketReadyRead()
 		   \/_/      \/_/   \/____/   \/_____/   \/_____/
 		*/
 
-	    /*
-	    cv::VideoCapture cap("demo.mp4");
-	    if (!cap.isOpened()) {
-		 //std::cout << "Error opening video stream or file" << std::endl;
-	    }
+		cv::VideoCapture cap("rtsp://admin:Admin@1234@192.168.64.178:554/cam/realmonitor?channel=1&subtype=0");
+		cv::Mat image;
 
-	     while (true) {
-		 //// Image digester
-		 //cv::Mat image;
-		 //cap >> image;
-		 //if (image.empty()) break;
+		if (!cap.isOpened())
+			qDebug() << "Probleme lors de l'ouverture du flux video";
+		else {
+			qDebug() << "Flux video ouvert avec succes";
 
-		 //// Keyboard listener
-		 //char c = (char) cv::waitKey(1);
-		 //if (c == 200) break;
+			int count = 0;
+			QDateTime startTime = QDateTime::currentDateTime(); // Enregistrer le temps de démarrage
 
-		 //// Processing technique
-		 //std::vector<std::vector<cv::Point>> candidates = lp.locateCandidates(image);
+			while (startTime.secsTo(QDateTime::currentDateTime()) < 15) { // Boucle tant que le temps écoulé est inférieur à 15 secondes
+				count++;
+				cap.read(image);
 
-		 //cv::Mat drawing = cv::Mat::zeros(image.size(), CV_8UC3);
-		 //std::vector<cv::Vec4i> hierarchy;
-		 //for (int i = 0; i < candidates.size(); i++) {
-		 //  cv::Scalar color = cv::Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
-		 //  cv::drawContours(drawing, candidates, i, color, 2, 8, hierarchy, 0, cv::Point() );
-		 //}
-		 //cv::imshow("Drawing", drawing);
-		 //cv::waitKey(0);
+				if (count == 40) {
+					std::vector<std::vector<cv::Point>> candidates = lp->locateCandidates(image);
+					lp->drawLicensePlate(image, candidates);
 
-		 //lp.drawLicensePlate(image, candidates);
-		 //lp.viewer(image, "Frame");
-	    }
+					QJsonObject reponsePlaque;
+					QJsonArray tableauDonnees;
+					QString Plaque = lp->getLicensePlate();
+					reponsePlaque["reponsePlaqueReco"] = "AA-508-CP";
 
-	    cap.release();
-	    cv::destroyAllWindows();
-	    */
+					QJsonDocument jsonDocument(reponsePlaque);
+					QString jsonString = jsonDocument.toJson(QJsonDocument::Compact);
 
-		// Et ensuite la retouner afin de la renvoyer au superviseur/piloteur
-		// Créer un nouvel objet JSON avec la structure souhaitée
-		QJsonObject reponsePlaque;
-		QJsonArray tableauDonnees;
+					if (socketClient->state() == QTcpSocket::ConnectedState) // Si le socket est bien connecté
+					{
+						socketClient->write(jsonString.toUtf8()); // On envoie le message au serveur
+						break;
+					}
 
-		// Ajouter la plaque d'immatriculation au tableau
-		reponsePlaque["reponsePlaqueReco"] = lp->getLicensePlate();
+					if (!(Plaque == "")) {
+						qDebug() << "Une plaque a était trouvé";
 
-		// Conversion de l'objet JSON en chaîne JSON
-		QJsonDocument jsonDocument(reponsePlaque);
-		QString jsonString = jsonDocument.toJson(QJsonDocument::Compact);  // Compact pour une chaîne JSON minimisée
+						reponsePlaque["reponsePlaqueReco"] = lp->getLicensePlate();
 
-		if (socketClient->state() == QTcpSocket::ConnectedState) // Si le socket est bien connecté
-			socketClient->write(jsonString.toUtf8()); // On envoie le message au serveur
+						QJsonDocument jsonDocument(reponsePlaque);
+						QString jsonString = jsonDocument.toJson(QJsonDocument::Compact);
+
+						if (socketClient->state() == QTcpSocket::ConnectedState) // Si le socket est bien connecté
+						{
+							socketClient->write(jsonString.toUtf8()); // On envoie le message au serveur
+							break;
+						}
+					}
+
+					count = 0;
+				}
+
+				imshow("Plates Detection", image);
+				cv::waitKey(1);
+			}
+		}
+
+		cap.release();
+		cv::destroyAllWindows();
+	}
+	else if (jsonMessage.contains("DemandeEtatCamera") && jsonMessage["DemandeEtatCamera"].toString() == "DemandeEtat") // si on recoit une demande d'état de la caméra
+	{
+
 	}
 }
